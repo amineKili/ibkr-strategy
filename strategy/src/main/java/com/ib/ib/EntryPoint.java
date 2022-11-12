@@ -5,11 +5,12 @@ package com.ib.ib;
 
 
 import com.ib.client.*;
+import com.ib.enumerations.DecisionEnum;
 import com.ib.helpers.HashMapSynchronizer;
 import com.ib.helpers.PositionDisclose;
 import com.ib.strategy.BaseStrategy;
 import com.ib.strategy.impl.TeslaMagicStrategy;
-import utils.ContractUtils;
+import com.ib.utils.ContractUtils;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -92,7 +93,7 @@ public class EntryPoint {
 
         marketDataType(wrapper.getClient());
 
-        OrderPlacer OOP = new OrderPlacer(wrapper.getClient(), wrapper.getCurrentOrderId());
+        OrderPlacer orderPlacer = new OrderPlacer(wrapper.getClient(), wrapper.getCurrentOrderId());
 
         try {
             while (true) {
@@ -101,7 +102,7 @@ public class EntryPoint {
                 var currentPositions = wrapper.getPositions();
                 System.out.println("Positions SIZE  ==> : " + currentPositions.size());
                 System.out.println("Positions ITSELF    : " + currentPositions);
-                
+
                 Map<String, Double> outgoingPositions = wrapper.getPositions();
                 TreeMap<String, Double> doneTreeMap = hashMapSynchronizer.syncMethod(outgoingPositions);
 
@@ -109,19 +110,13 @@ public class EntryPoint {
 
                 TimeUnit.SECONDS.sleep(4);
 
-                System.out.println("==============================================================");
-
                 System.out.println("Abs # of contracts [//open//]=   " + PositionDisclose.getAbsolutePositionDisclose(doneTreeMap));
-
-                System.out.println("==============================================================");
-
 
                 for (LiveContract activeContract : activeContracts) {
                     Contract currentContract = activeContract.getContract();
                     String currentSymbolFUT = activeContract.getSymbol();
                     int reqID_HistoricalData = activeContract.getHistData_ReqID();
 
-                    System.out.println("          ");
                     Thread.sleep(10000);
 
                     System.out.println("** Checking if position for *=> " + currentSymbolFUT + " equals zero then OPN ~> However current open: " + PositionDisclose.getPositionDisclose(doneTreeMap, currentSymbolFUT));
@@ -134,12 +129,12 @@ public class EntryPoint {
                         if (wrapper.getBarsHistDataArrayList().size() != 0) {
                             TimeUnit.SECONDS.sleep(8);
                             ArrayList<Bar> incomingBarInput = wrapper.getBarsHistDataArrayList();
-                            String determinedDecision = strategy.execute(incomingBarInput);
+                            DecisionEnum determinedDecision = strategy.execute(incomingBarInput);
                             TimeUnit.SECONDS.sleep(6);
 
                             // TODO: implement both strategies test
-                            if (determinedDecision.equals("BUY") || determinedDecision.equals("SELL")) {
-                                OOP.placeOrder(currentContract, OrderTypes.MarketOrder(determinedDecision, 1));
+                            if (determinedDecision == DecisionEnum.BUY || determinedDecision == DecisionEnum.SELL) {
+                                orderPlacer.placeOrder(currentContract, OrderTypes.MarketOrder(determinedDecision.toAction(), 1));
                             }
                             incomingBarInput.clear();
                         }

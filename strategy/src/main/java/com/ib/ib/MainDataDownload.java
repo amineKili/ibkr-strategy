@@ -3,11 +3,13 @@
 package com.ib.ib;
 
 import com.ib.client.*;
+import com.ib.enumerations.DecisionEnum;
 import com.ib.helpers.HashMapSynchronizer;
 import com.ib.helpers.PositionDisclose;
 import com.ib.strategy.BaseStrategy;
 import com.ib.strategy.impl.TeslaMagicStrategy;
-import utils.ContractUtils;
+import lombok.extern.slf4j.Slf4j;
+import com.ib.utils.ContractUtils;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -19,6 +21,7 @@ import static java.lang.Thread.sleep;
  * Class used to download historical data and contract paraments at contract changes every quarter, at expiration.
  * Disregard this class.
  */
+@Slf4j
 public class MainDataDownload {
 
     public static void main(String[] args) throws InterruptedException {
@@ -42,7 +45,7 @@ public class MainDataDownload {
                 try {
                     reader.processMsgs();
                 } catch (Exception e) {
-                    System.out.println("Exception: " + e.getMessage());
+                    log.info("Exception: " + e.getMessage());
                 }
             }
         }).start();
@@ -106,7 +109,7 @@ public class MainDataDownload {
 
         TimeUnit.MINUTES.sleep(3);
 
-        System.out.println("  ");
+        log.info("  ");
 
         marketDataType(wrapper.getClient());
 
@@ -116,24 +119,19 @@ public class MainDataDownload {
 
                 positionStatusOperations(wrapper.getClient());
                 var positions = wrapper.getPositions();
-                System.out.println("Positions SIZE  ==> : " + positions.size());
-                System.out.println("Positions ITSELF    : " + positions);
+                log.info("Positions SIZE  ==> : " + positions.size());
+                log.info("Positions ITSELF    : " + positions);
 
-                System.out.println("  ");
+                log.info("  ");
 
                 Map<String, Double> outgoingPositions = wrapper.getPositions();
                 TreeMap<String, Double> doneTreeMap = hashMapSynchronizer.syncMethod(outgoingPositions);
 
-                System.out.println("|------- DONE ----  " + doneTreeMap);
+                log.info("|------- DONE ----  " + doneTreeMap);
 
                 TimeUnit.SECONDS.sleep(4);
 
-                System.out.println("==============================================================");
-
-                System.out.println("Abs # of contracts [//open//]=   " + PositionDisclose.getAbsolutePositionDisclose(doneTreeMap));
-
-                System.out.println("==============================================================");
-
+                log.info("Abs # of contracts [//open//]=   " + PositionDisclose.getAbsolutePositionDisclose(doneTreeMap));
 
                 for (LiveContract activeContract : activeContracts) {
                     Contract currentContract = activeContract.getContract();
@@ -142,7 +140,7 @@ public class MainDataDownload {
 
                     Thread.sleep(10000);
 
-                    System.out.println("** Checking if position for *=> " + currentSymbolFUT + " equals zero then OPN ~> However current open: " + PositionDisclose.getPositionDisclose(doneTreeMap, currentSymbolFUT));
+                    log.info("** Checking if position for *=> " + currentSymbolFUT + " equals zero then OPN ~> However current open: " + PositionDisclose.getPositionDisclose(doneTreeMap, currentSymbolFUT));
 
                     if (PositionDisclose.getPositionDisclose(doneTreeMap, currentSymbolFUT) == 0.00) {
 
@@ -152,13 +150,13 @@ public class MainDataDownload {
                         if (wrapper.getBarsHistDataArrayList().size() != 0) {
                             TimeUnit.SECONDS.sleep(8);
                             ArrayList<Bar> incomingBarInput = wrapper.getBarsHistDataArrayList();
-                            String determinedDecision = teslaStrategy.execute(incomingBarInput);
+                            DecisionEnum determinedDecision = teslaStrategy.execute(incomingBarInput);
                             TimeUnit.SECONDS.sleep(6);
 
-                            System.out.println(" ");
+                            log.info(" ");
 
-                            if (determinedDecision.equals("BUY") || determinedDecision.equals("SELL")) {
-                                OOP.placeOrder(currentContract, OrderTypes.MarketOrder(determinedDecision, 1));
+                            if (determinedDecision == DecisionEnum.BUY || determinedDecision == DecisionEnum.SELL) {
+                                OOP.placeOrder(currentContract, OrderTypes.MarketOrder(determinedDecision.toAction(), 1));
                             }
 
                             incomingBarInput.clear();
@@ -167,14 +165,10 @@ public class MainDataDownload {
                     }
                 }
 
-                System.out.println("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&");
-                System.out.println("  === Open completed === Open completed === Open completed === Open completed === ");
-                System.out.println("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&");
-
             }
         } catch (Exception e) {
             e.printStackTrace();
-            System.out.println(" End == End == End == End == End == End == End == End == End == End == End == End == End == End ");
+            log.info(" End == End == End == End == End == End == End == End == End == End == End == End == End == End ");
 
             TimeUnit.SECONDS.sleep(5);
             m_client.eDisconnect();
@@ -200,7 +194,7 @@ public class MainDataDownload {
     }
 
     public static void historicalDataMainOPERATIONS(int reqID_HistData, EClientSocket client, Contract FXFuture00000) throws InterruptedException {
-        System.out.println("Futures Historical Data Main-- OPERATION    --->  historicalDataMainOPERATIONS    ***   ---    " + FXFuture00000.description() + "  ");
+        log.info("Futures Historical Data Main-- OPERATION    --->  historicalDataMainOPERATIONS    ***   ---    " + FXFuture00000.description() + "  ");
 
         Date nowVerifierToday = new Date();
         SimpleDateFormat timeHistDf12 = new SimpleDateFormat("MM-dd-yy hh:mm a");
@@ -215,9 +209,9 @@ public class MainDataDownload {
         String cstHour12 = timeHistDf12.format(nowVerifierToday);
         String cstHour24 = timeHistDf24.format(nowVerifierToday);
 
-        System.out.println("Date in New York Timezone (EST) : " + estNY12 + "   ===> " + estNY24);
-        System.out.println("Date in Houston  Timezone (CST) : " + cstHour12 + "   ===> " + cstHour24);
-        System.out.println("=====================================================================================================");
+        log.info("Date in New York Timezone (EST) : " + estNY12 + "   ===> " + estNY24);
+        log.info("Date in Houston  Timezone (CST) : " + cstHour12 + "   ===> " + cstHour24);
+        log.info("=====================================================================================================");
 
         List<TagValue> chartOptions = new ArrayList<>();
 
@@ -232,7 +226,7 @@ public class MainDataDownload {
     // TODO: clean
     public static void historicalDataMainOPERATIONS_Clean(int reqID_HistData, EClientSocket client, Contract FXFuture00000) throws InterruptedException {
 
-        System.out.println("Futures Historical Data Main-- OPERATION    --->  historicalDataMainOPERATIONS    ***   ---    " + FXFuture00000.description() + "  ");
+        log.info("Futures Historical Data Main-- OPERATION    --->  historicalDataMainOPERATIONS    ***   ---    " + FXFuture00000.description() + "  ");
 
         Date nowVerifier_Today = new Date();
         SimpleDateFormat timeHistDf12 = new SimpleDateFormat("MM-dd-yy hh:mm a");
@@ -247,9 +241,9 @@ public class MainDataDownload {
         String cstHour12 = timeHistDf12.format(nowVerifier_Today);
         String cstHour24 = timeHistDf24.format(nowVerifier_Today);
 
-        System.out.println("Date in New York Timezone (EST) : " + estNY12 + "   ===> " + estNY24);
-        System.out.println("Date in Houston  Timezone (CST) : " + cstHour12 + "   ===> " + cstHour24);
-        System.out.println("=====================================================================================================");
+        log.info("Date in New York Timezone (EST) : " + estNY12 + "   ===> " + estNY24);
+        log.info("Date in Houston  Timezone (CST) : " + cstHour12 + "   ===> " + cstHour24);
+        log.info("=====================================================================================================");
 
         List<TagValue> chartOptions = new ArrayList<>();
 

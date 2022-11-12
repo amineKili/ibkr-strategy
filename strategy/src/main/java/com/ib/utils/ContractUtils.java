@@ -1,4 +1,4 @@
-package utils;
+package com.ib.utils;
 
 import com.ib.client.Contract;
 

@@ -1,8 +1,10 @@
 package com.ib.strategy.impl;
 
 import com.ib.client.Bar;
+import com.ib.enumerations.DecisionEnum;
 import com.ib.ib.LiveBar;
 import com.ib.strategy.BaseStrategy;
+import lombok.extern.slf4j.Slf4j;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
@@ -11,15 +13,12 @@ import java.util.concurrent.TimeUnit;
 /**
  * Simple strategy
  */
-
+@Slf4j
 public class SimpleStrategy extends BaseStrategy {
 
     private static final DecimalFormat df5 = new DecimalFormat("#.#####");
     private static final DecimalFormat df6 = new DecimalFormat("+#.#####%;-#");
     private static final DecimalFormat df7 = new DecimalFormat("+#.##");
-
-    String decision = "";
-    String candleStickDecision = "NO";
 
     int sizeSimpleBar;
     double pivotPoint0, pivotPoint1;
@@ -30,14 +29,12 @@ public class SimpleStrategy extends BaseStrategy {
     int bar2;
 
 
-    public String execute(ArrayList<Bar> barInput) throws InterruptedException {
+    public DecisionEnum execute(ArrayList<Bar> barInput) throws InterruptedException {
 
-        System.out.println("===================  simple-DecisionDeterminer_NoTick =============================================>  ");
-        System.out.println("============          Here's ArrayList<Bar> barInput         ======================================>  " + barInput);
-        System.out.println("===================================================================================================>  ");
+        DecisionEnum decision = DecisionEnum.NO;
 
-        System.out.println("===================  simple-DecisionDeterminer_NoTick =============================================>  ");
-        System.out.println("===Bar size:  =>  " + barInput.size());
+        log.info("Bar size: {}", barInput.size());
+        log.info("Modulo: {}", barInput.size() % 3);
 
         sizeSimpleBar = barInput.size();
 
@@ -51,50 +48,26 @@ public class SimpleStrategy extends BaseStrategy {
             bar2 = 2;
         }
 
-        System.out.println(" sizeSimpleBar===>  " + sizeSimpleBar);
-
+        log.info("sizeSimpleBar: " + sizeSimpleBar);
 
         pivotPoint0 = (barInput.get(bar1).low() + barInput.get(bar1).high() + barInput.get(bar1).close()) / 3;
         pivotPoint1 = (barInput.get(bar2).low() + barInput.get(bar2).high() + barInput.get(bar2).close()) / 3;
 
-        System.out.println("pivotpoint_0  = " + pivotPoint0);
-        System.out.println("pivotpoint_1  = " + pivotPoint1);
+        log.info("pivotPoint0: " + pivotPoint0);
+        log.info("pivotPoint1: " + pivotPoint1);
 
         slope = barInput.get(bar2).close() - pivotPoint1;
 
-        System.out.println("Slope                   :  " + slope);
+        log.info("Slope:  " + slope);
 
         if (slope > 0.0) {
-            decision = "BUY";
+            decision = DecisionEnum.BUY;
         }
         if (slope < 0.0) {
-            decision = "SELL";
+            decision = DecisionEnum.SELL;
         }
 
         return decision;
 
     }
-
-    public String getDecision() {
-        return decision;
-    }
-
-    public void setDecision(String decision) {
-        this.decision = decision;
-    }
-
-    public double getMomentum() {
-        return momentum;
-    }
-
-    public void setMomentum(double momentum) {
-        this.momentum = momentum;
-    }
-
-    public LiveBar getLiveBar() {
-        String strResult = getDecision();
-        double doubleResult = getMomentum();
-        return new LiveBar(strResult, doubleResult);
-    }
-
 }
