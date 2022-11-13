@@ -197,7 +197,7 @@ public class GradientBoostedTreesImpl implements BaseModel {
 
         var prediction = model.predict(dataFrame)[0];
 
-        return byteCategoryMapStringCategory.get("EXECUTE").getOrDefault(Integer.valueOf(prediction).byteValue(), "NONE");
+        return byteCategoryMapStringCategory.get("EXECUTE").getOrDefault(Integer.valueOf(prediction).byteValue(), "NO");
     }
 
 

@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.ib.ib;
+package com.aminekili.ewrapper;
 
 import com.ib.client.*;
 
@@ -85,7 +85,6 @@ public class EWrapperImplementation implements EWrapper {
 
     @Override
     public void orderStatus(int orderId, String status, double filled, double remaining, double avgFillPrice, int permId, int parentId, double lastFillPrice, int clientId, String whyHeld, double mktCapPrice) {
-        // ROBELCORRECT
 //		System.out.println("OrderStatus. Id: "+orderId+", Status: "+status+", Filled"+filled+", Remaining: "+remaining
 //                +", AvgFillPrice: "+avgFillPrice+", PermId: "+permId+", ParentId: "+parentId+", LastFillPrice: "+lastFillPrice+
 //                ", ClientId: "+clientId+", WhyHeld: "+whyHeld+", MktCapPrice: "+mktCapPrice);
@@ -97,7 +96,6 @@ public class EWrapperImplementation implements EWrapper {
     @Override
     public void openOrder(int orderId, Contract contract, Order order, OrderState orderState) {
 
-        // ROBELCORRECT
         //System.out.println(EWrapperMsgGenerator.openOrder(orderId, contract, order, orderState));
     }
     //! [openorder]
@@ -500,7 +498,7 @@ public class EWrapperImplementation implements EWrapper {
             System.out.print("tier: " + tier.toString() + ", ");
         }
 
-        
+
     }
     //! [softDollarTiers]
 
@@ -511,7 +509,7 @@ public class EWrapperImplementation implements EWrapper {
             System.out.print("Family Code. AccountID: " + fc.accountID() + ", FamilyCode: " + fc.familyCodeStr());
         }
 
-        
+
     }
     //! [familyCodes]
 
@@ -529,7 +527,7 @@ public class EWrapperImplementation implements EWrapper {
             System.out.print("Contract. ConId: " + c.conid() + ", Symbol: " + c.symbol() + ", SecType: " + c.secType() + ", PrimaryExch: " + c.primaryExch() + ", Currency: " + c.currency() + ", DerivativeSecTypes:[" + derivativeSecTypesSB.toString() + "]");
         }
 
-        
+
     }
     //! [symbolSamples]
 
@@ -574,7 +572,7 @@ public class EWrapperImplementation implements EWrapper {
             System.out.print("News Provider. ProviderCode: " + np.providerCode() + ", ProviderName: " + np.providerName() + "\n");
         }
 
-        
+
     }
     //! [newsProviders]
 
@@ -650,9 +648,9 @@ public class EWrapperImplementation implements EWrapper {
     @Override
     public void pnl(int reqId, double dailyPnL, double unrealizedPnL, double realizedPnL) {
         System.out.println(EWrapperMsgGenerator.pnl(reqId, dailyPnL, unrealizedPnL, realizedPnL));
-        
+
         System.out.println("UnrealizedPnL:  " + df1.format(unrealizedPnL));
-        
+
         this.overallUnrealizedPNL = unrealizedPnL;
     }
     //! [pnl]

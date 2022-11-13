@@ -2,13 +2,11 @@ package com.ib.strategy.impl;
 
 import com.ib.client.Bar;
 import com.ib.enumerations.DecisionEnum;
-import com.ib.ib.LiveBar;
 import com.ib.strategy.BaseStrategy;
 import lombok.extern.slf4j.Slf4j;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Simple strategy

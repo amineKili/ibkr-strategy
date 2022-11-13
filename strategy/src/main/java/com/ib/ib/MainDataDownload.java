@@ -2,12 +2,16 @@
  * and conditions of the IB API Non-Commercial License or the IB API Commercial License, as applicable. */
 package com.ib.ib;
 
+import com.aminekili.ewrapper.EWrapperImplementation;
+import com.aminekili.utils.LiveContract;
+import com.aminekili.utils.OrderPlacer;
+import com.aminekili.utils.OrderTypes;
 import com.ib.client.*;
 import com.ib.enumerations.DecisionEnum;
 import com.ib.helpers.HashMapSynchronizer;
 import com.ib.helpers.PositionDisclose;
 import com.ib.strategy.BaseStrategy;
-import com.ib.strategy.impl.TeslaMagicStrategy;
+import com.ib.strategy.impl.Tesla369Strategy;
 import lombok.extern.slf4j.Slf4j;
 import com.ib.utils.ContractUtils;
 
@@ -28,7 +32,7 @@ public class MainDataDownload {
 
         EWrapperImplementation wrapper = new EWrapperImplementation();
         HashMapSynchronizer hashMapSynchronizer = new HashMapSynchronizer();
-        BaseStrategy teslaStrategy = new TeslaMagicStrategy();
+        BaseStrategy teslaStrategy = new Tesla369Strategy();
 
         final EClientSocket m_client = wrapper.getClient();
         final EReaderSignal m_signal = wrapper.getSignal();

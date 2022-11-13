@@ -4,12 +4,16 @@ package com.ib.ib;
  * and conditions of the IB API Non-Commercial License or the IB API Commercial License, as applicable. */
 
 
+import com.aminekili.ewrapper.EWrapperImplementation;
+import com.aminekili.utils.LiveContract;
+import com.aminekili.utils.OrderPlacer;
+import com.aminekili.utils.OrderTypes;
 import com.ib.client.*;
 import com.ib.enumerations.DecisionEnum;
 import com.ib.helpers.HashMapSynchronizer;
 import com.ib.helpers.PositionDisclose;
 import com.ib.strategy.BaseStrategy;
-import com.ib.strategy.impl.TeslaMagicStrategy;
+import com.ib.strategy.impl.Tesla369Strategy;
 import com.ib.utils.ContractUtils;
 
 import java.text.SimpleDateFormat;
@@ -23,7 +27,7 @@ public class EntryPoint {
 
         EWrapperImplementation wrapper = new EWrapperImplementation();
         HashMapSynchronizer hashMapSynchronizer = new HashMapSynchronizer();
-        BaseStrategy strategy = new TeslaMagicStrategy();
+        BaseStrategy strategy = new Tesla369Strategy();
 
         final EClientSocket m_client = wrapper.getClient();
         final EReaderSignal m_signal = wrapper.getSignal();

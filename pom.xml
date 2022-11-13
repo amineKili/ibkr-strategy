@@ -18,6 +18,7 @@
     <modules>
         <module>ib</module>
         <module>strategy</module>
+        <module>ib-wrapper</module>
     </modules>
 
 </project>

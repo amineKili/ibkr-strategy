@@ -3,6 +3,10 @@ package com.ib.ai.model;
 import java.io.IOException;
 import java.net.URISyntaxException;
 
+
+// TODO: remove open, high low and close from the model
+// TODO: test model without those features
+
 public interface BaseModel {
 
     void test() throws IOException, URISyntaxException;
