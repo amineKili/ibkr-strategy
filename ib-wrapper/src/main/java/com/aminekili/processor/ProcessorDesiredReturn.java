@@ -10,7 +10,6 @@ import java.util.Set;
 @Slf4j
 public class ProcessorDesiredReturn {
 
-
     HashMap<String, Double> Gains_per_Trade = new HashMap<>();
     HashMap<String, Double> DesiredGains_per_Trade = new HashMap<>();
 

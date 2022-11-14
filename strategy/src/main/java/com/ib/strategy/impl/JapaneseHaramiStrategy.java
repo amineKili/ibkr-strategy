@@ -157,4 +157,9 @@ public class JapaneseHaramiStrategy extends BaseStrategy {
         return decision;
     }
 
+    @Override
+    public DecisionEnum execute(String symbol, ArrayList<Bar> barInput) throws InterruptedException {
+        return null;
+    }
+
 }

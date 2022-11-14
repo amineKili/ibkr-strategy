@@ -15,7 +15,9 @@ import java.net.URISyntaxException;
 import java.text.DecimalFormat;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
 
@@ -29,20 +31,30 @@ public class Tesla369BoostedTreeStrategy extends BaseStrategy {
     double teslaValue6 = 0.32321844;
     double teslaValue3 = 0.16160922;
 
-    BaseModel model;
+    Map<String,BaseModel> modelPerCurrency = new HashMap<>();
 
-    public Tesla369BoostedTreeStrategy(String currency) {
+    // TODO: in first call instantiate the model
+    public Tesla369BoostedTreeStrategy() {
         Predicate<Double> filterMinute = val -> val == 20 || val == 40 || val == 0;
-        try {
-            model = new GradientBoostedTreesImpl(AIDataSetUtils.getTrainingFileByCurrency(currency), "", "", List.of(new Pair<>("Minute", filterMinute)));
-            model.train();
-            model.test();
-        } catch (IOException | URISyntaxException e) {
-            throw new RuntimeException(e);
+        for(String currency: AIDataSetUtils.getCurrencies()) {
+            try {
+                BaseModel model = new GradientBoostedTreesImpl(AIDataSetUtils.getTrainingFileByCurrency(currency), "", "", List.of(new Pair<>("Minute", filterMinute)));
+                model.train();
+                modelPerCurrency.put(currency, model);
+            } catch (IOException | URISyntaxException e) {
+                e.printStackTrace();
+            }
         }
+
     }
 
+    @Override
     public DecisionEnum execute(ArrayList<Bar> barInput) throws InterruptedException {
+        throw new UnsupportedOperationException("Not implemented");
+    }
+
+    @Override
+    public DecisionEnum execute(String symbol, ArrayList<Bar> barInput) throws InterruptedException {
 
         DecisionEnum decision = DecisionEnum.NO;
 
@@ -123,11 +135,11 @@ public class Tesla369BoostedTreeStrategy extends BaseStrategy {
                 log.info("Volume Condition not met for opening a position");
             }
 
-            if (this.model != null && decision != DecisionEnum.NO) {
+            if (this.modelPerCurrency.containsKey(symbol.toUpperCase()) && decision != DecisionEnum.NO) {
                 var bar = barInput.get(0);
                 log.info("Parsing Time {}", bar.time());
                 LocalDateTime localDateTime = LocalDateTime.parse(bar.time());
-                String newDecision = this.model.predict(bar.open(), bar.high(), bar.low(), bar.close(), bar.wap(), bar.volume(), bar.count(), localDateTime.getMinute(), tesla3, tesla6, tesla9, decision.name());
+                String newDecision = this.modelPerCurrency.get(symbol.toUpperCase()).predict(bar.open(), bar.high(), bar.low(), bar.close(), bar.wap(), bar.volume(), bar.count(), localDateTime.getMinute(), tesla3, tesla6, tesla9, decision.name());
                 if (!newDecision.equalsIgnoreCase("EXECUTE")) {
                     decision = DecisionEnum.NO;
                 }

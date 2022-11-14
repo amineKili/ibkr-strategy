@@ -103,7 +103,6 @@ public class ContractUtils {
         return contract;
     }
 
-
     Contract getContract(String symbol) {
         Contract contract = new Contract();
         contract.symbol(symbol);

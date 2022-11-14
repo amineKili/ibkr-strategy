@@ -13,21 +13,24 @@ import com.ib.enumerations.DecisionEnum;
 import com.ib.helpers.HashMapSynchronizer;
 import com.ib.helpers.PositionDisclose;
 import com.ib.strategy.BaseStrategy;
+import com.ib.strategy.impl.Tesla369BoostedTreeStrategy;
 import com.ib.strategy.impl.Tesla369Strategy;
 import com.ib.utils.ContractUtils;
+import com.ib.utils.LiveContractUtils;
+import lombok.extern.slf4j.Slf4j;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
+@Slf4j
 public class EntryPoint {
-
 
     public static void main(String[] args) throws InterruptedException {
 
         EWrapperImplementation wrapper = new EWrapperImplementation();
         HashMapSynchronizer hashMapSynchronizer = new HashMapSynchronizer();
-        BaseStrategy strategy = new Tesla369Strategy();
+        BaseStrategy strategy = new Tesla369BoostedTreeStrategy();
 
         final EClientSocket m_client = wrapper.getClient();
         final EReaderSignal m_signal = wrapper.getSignal();
@@ -42,7 +45,6 @@ public class EntryPoint {
         //  7496  live account - TWS
         //  4002  paper-trading account - IB Gateway
         //  4000  live account  - IB Gateway
-
 
         reader.start();
         //An additional thread is created in this program design to empty the messaging queue
@@ -62,38 +64,17 @@ public class EntryPoint {
         Thread.sleep(1000);
 
 
-        var liveContract00 = new LiveContract(ContractUtils.MXP_FXFutureContract(), "MXP", 491421951, 1852.00, 1481.00, 19.00, 11.00, 3000, 19000);
-        var liveContract01 = new LiveContract(ContractUtils.NZD_FXFutureContract(), "NZD", 496647000, 2446.00, 1957.00, 23.00, 16.00, 3001, 19001);
-        var liveContract02 = new LiveContract(ContractUtils.CAD_FXFutureContract(), "CAD", 259910553, 3145.00, 2516.00, 23.00, 16.00, 3002, 19002);
-        var liveContract03 = new LiveContract(ContractUtils.ZAR_FXFutureContract(), "ZAR", 455429137, 3180.00, 2544.00, 24.00, 17.00, 3003, 19003);
-        var liveContract04 = new LiveContract(ContractUtils.AUD_FXFutureContract(), "AUD", 299701779, 3383.00, 2707.00, 33.00, 22.00, 3004, 19004);
-        var liveContract05 = new LiveContract(ContractUtils.JPY_FXFutureContract(), "JPY", 299701836, 3438.00, 2751.00, 30.00, 22.00, 3005, 19005);
-        var liveContract06 = new LiveContract(ContractUtils.GBP_FXFutureContract(), "GBP", 299701782, 4404.00, 3524.00, 41.00, 30.00, 3006, 19006);
-        var liveContract07 = new LiveContract(ContractUtils.EUR_FXFutureContract(), "EUR", 299701833, 4637.00, 3710.00, 36.00, 28.00, 3007, 19007);
-        var liveContract08 = new LiveContract(ContractUtils.CHF_FXFutureContract(), "CHF", 299701893, 4825.00, 3860.00, 36.00, 28.00, 3008, 19008);
-
-
-        Map<String, LiveContract> portfolioVault = new HashMap<>();
-        portfolioVault.put("MXP", liveContract00);
-        portfolioVault.put("NZD", liveContract01);
-        portfolioVault.put("AUD", liveContract02);
-        portfolioVault.put("CAD", liveContract03);
-        portfolioVault.put("ZAR", liveContract04);
-        portfolioVault.put("JPY", liveContract05);
-        portfolioVault.put("CHF", liveContract06);
-        portfolioVault.put("GBP", liveContract07);
-        portfolioVault.put("EUR", liveContract08);
-
         List<LiveContract> activeContracts = new ArrayList<>();
-        activeContracts.add(portfolioVault.put("MXP", liveContract00));
-        activeContracts.add(portfolioVault.put("NZD", liveContract01));
-        activeContracts.add(portfolioVault.put("AUD", liveContract02));
-        activeContracts.add(portfolioVault.put("CAD", liveContract03));
-        activeContracts.add(portfolioVault.put("ZAR", liveContract04));
-        activeContracts.add(portfolioVault.put("JPY", liveContract05));
-        activeContracts.add(portfolioVault.put("CHF", liveContract06));
-        activeContracts.add(portfolioVault.put("GBP", liveContract07));
-        activeContracts.add(portfolioVault.put("EUR", liveContract08));
+        activeContracts.add(LiveContractUtils.getLiveContract("MXP"));
+        activeContracts.add(LiveContractUtils.getLiveContract("MXN"));
+        activeContracts.add(LiveContractUtils.getLiveContract("AUD"));
+        activeContracts.add(LiveContractUtils.getLiveContract("CAD"));
+        activeContracts.add(LiveContractUtils.getLiveContract("ZAR"));
+        activeContracts.add(LiveContractUtils.getLiveContract("CHF"));
+        activeContracts.add(LiveContractUtils.getLiveContract("GBP"));
+        activeContracts.add(LiveContractUtils.getLiveContract("EUR"));
+        activeContracts.add(LiveContractUtils.getLiveContract("JPY"));
+        activeContracts.add(LiveContractUtils.getLiveContract("NZD"));
 
         marketDataType(wrapper.getClient());
 
@@ -115,7 +96,8 @@ public class EntryPoint {
                 TimeUnit.SECONDS.sleep(4);
 
                 System.out.println("Abs # of contracts [//open//]=   " + PositionDisclose.getAbsolutePositionDisclose(doneTreeMap));
-
+                // TODO: adjust this work in parallel with other contracts
+                // TODO: react each 20 minutes
                 for (LiveContract activeContract : activeContracts) {
                     Contract currentContract = activeContract.getContract();
                     String currentSymbolFUT = activeContract.getSymbol();
@@ -123,7 +105,7 @@ public class EntryPoint {
 
                     Thread.sleep(10000);
 
-                    System.out.println("** Checking if position for *=> " + currentSymbolFUT + " equals zero then OPN ~> However current open: " + PositionDisclose.getPositionDisclose(doneTreeMap, currentSymbolFUT));
+                    log.info("Checking if position for *=> " + currentSymbolFUT + " equals zero then OPN ~> However current open: " + PositionDisclose.getPositionDisclose(doneTreeMap, currentSymbolFUT));
 
                     if (PositionDisclose.getPositionDisclose(doneTreeMap, currentSymbolFUT) == 0.00) {
 
@@ -133,10 +115,9 @@ public class EntryPoint {
                         if (wrapper.getBarsHistDataArrayList().size() != 0) {
                             TimeUnit.SECONDS.sleep(8);
                             ArrayList<Bar> incomingBarInput = wrapper.getBarsHistDataArrayList();
-                            DecisionEnum determinedDecision = strategy.execute(incomingBarInput);
+                            DecisionEnum determinedDecision = strategy.execute(activeContract.getSymbol(), incomingBarInput);
                             TimeUnit.SECONDS.sleep(6);
 
-                            // TODO: implement both strategies test
                             if (determinedDecision == DecisionEnum.BUY || determinedDecision == DecisionEnum.SELL) {
                                 orderPlacer.placeOrder(currentContract, OrderTypes.MarketOrder(determinedDecision.toAction(), 1));
                             }
@@ -145,9 +126,7 @@ public class EntryPoint {
                     }
                 }
 
-                System.out.println("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&");
-                System.out.println("  === Open completed === Open completed === Open completed === Open completed === ");
-                System.out.println("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&");
+                log.info("Open completed");
 
 
             }
@@ -192,8 +171,6 @@ public class EntryPoint {
 
         Thread.sleep(4000);
         client.cancelHistoricalData(reqID_HistData);
-
-
     }
 
 
@@ -204,7 +181,6 @@ public class EntryPoint {
          */
         client.reqMarketDataType(1);
         //! [reqmarketdatatype]
-
     }
 
     private static void contractOperations(EClientSocket client) {

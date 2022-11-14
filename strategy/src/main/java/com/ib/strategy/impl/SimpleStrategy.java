@@ -68,4 +68,9 @@ public class SimpleStrategy extends BaseStrategy {
         return decision;
 
     }
+
+    @Override
+    public DecisionEnum execute(String symbol, ArrayList<Bar> barInput) throws InterruptedException {
+        return null;
+    }
 }

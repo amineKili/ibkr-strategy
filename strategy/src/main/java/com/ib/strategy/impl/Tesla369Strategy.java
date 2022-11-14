@@ -133,4 +133,9 @@ public class Tesla369Strategy extends BaseStrategy {
         return decision;
     }
 
+    @Override
+    public DecisionEnum execute(String symbol, ArrayList<Bar> barInput) throws InterruptedException {
+        return null;
+    }
+
 }
